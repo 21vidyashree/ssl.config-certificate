@@ -1,0 +1,59 @@
+SSL Configuration:
+
+#download certbot
+wget https://dl.eff.org/certbot-auto
+
+#make it an executable file
+chmod a+x certbot-auto
+
+#Before generating the certificate make it sure that you have made an entry in virtual host with appropriate IP & Domain name
+vim /etc/hosts
+
+#Ex. we have added following line 
+52.44.91.205    dev.mobelisk.net
+
+#then, create ther certificate[goto the foldr where certbot is downloaded]
+sudo ./certbot-auto --debug -v --server https://acme-v01.api.letsencrypt.org/directory certonly -d dev.mobelisk.net
+
+#then it will ask admin email ID. If you lose your account credentials, you can recover through e-mails sent to amit.tidke@e-zest.in(which is admin email you provided).
+
+#then, it will ask:
+How would you like to authenticate with the ACME CA?
+-------------------------------------------------------------------------------
+1: Apache Web Server plugin - Beta (apache)
+2: Place files in webroot directory (webroot)
+3: Spin up a temporary webserver (standalone)
+-------------------------------------------------------------------------------
+#go with 2nd option
+
+#next, thing it will ask:
+Select the webroot for dev.mobelisk.net[your domain name]:
+-------------------------------------------------------------------------------
+1: Enter a new webroot
+-------------------------------------------------------------------------------
+#Enter 1 and in the next step path of root directory for specific
+#like in this case we had entered /var/www/html/dynamic/
+
+#Boom!! Congratulations! Your certificate and chain have been generated & saved @etc/letsencrypt/live/yourdomainname/
+
+##Then you have to enable HTTPS:
+#you have to modify ssl.conf files
+sudo nano /etc/httpd/conf.d/ssl.conf
+
+Set SSLCertificateFile to your Certificate path (/etc/letsencrypt/live/YOUR_WEBSITE_HERE/cert.pem).
+Set SSLCertificateKeyFile to your Private Key path (etc/letsencrypt/live/YOUR_WEBSITE_HERE/privkey.pem).
+Set SSLCertificateChainFile to your Full Chain path (etc/letsencrypt/live/YOUR_WEBSITE_HERE/fullchain.pem).
+
+#Restart apache
+sudo service httpd restart
+
+Done!!! you can go ahead to test the links
+
+##Setup SSL Auto-renew
+If you want to get rid off the renewal of SSL you can add single line in cron jobs:
+0 1,13 * * * /home/ec2-user/certbot-auto renew 
+
+
+
+enable ssl 
+sudo a2enmod ssl
