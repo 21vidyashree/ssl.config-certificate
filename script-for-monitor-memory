@@ -1,0 +1,68 @@
+
+
+
+#!/bin/bash
+
+SPACEUSED=$(df -h | grep -i '/dev/xvda1' | awk {'print $5'})
+SPACEUTILIZATION=$(df -h | grep -i '/dev/xvda1' | awk {'print substr($5, 0, length($6))'})
+SPACEAVAILABLE=$(df -h | grep -i '/dev/xvda1' | awk {'print $4'})
+
+CPUUTILIZATION=$(free -m| grep -i 'Mem:' | awk {'print $4'})
+
+if [ $SPACEUTILIZATION  -ge 70 ] &&  [ $CPUUTILIZATION -le 1000 ]
+then
+
+echo "This Server is in Alert State!!!\n\nUsed space of root disk is $SPACEUSED\n\nAvailable Disk space: $SPACEAVAILABLE\n\nFree RAM Space: $CPUUTILIZATION\n\n"
+
+fi
+
+if [ $SPACEUTILIZATION  -ge 70 ]
+then
+
+echo "Storage Space on this Server is filling up.\n\nUsed space of root disk is $SPACEUSED\n\nAvailable Disk space: $SPACEAVAILABLE\n\nPlease clean some space.\n\nOther Details:\nFree RAM Space: $CPUUTILIZATION\n\n"
+
+fi
+
+if [ $CPUUTILIZATION  -le 1000 ]
+then
+
+echo "CPU Utilization for this server is High.\n\nFree RAM Space: $CPUUTILIZATION.\n\n Please free up the space on RAM space.\n\nOther Details:\nUsed space of root disk is $SPACEUSED\n\nAvailable Disk space: $SPACEAVAILABLE"
+
+fi
+
+if [ $SPACEUTILIZATION  -lt 70 ] && [ $CPUUTILIZATION -gt 1000 ]
+then
+
+echo "This Server is in good health.\n\nUsed space of root disk is $SPACEUSED\n\nAvailable Disk space: $SPACEAVAILABLE\n\nFree RAM Space: $CPUUTILIZATION MB"
+
+fi
+
+
+
+==============================================================================
+
+
+
+#!/bin/bash
+echo "HealthCheck Report for $(date +%d-%B-%Y)" > /scripts/healthcheck/report.txt
+
+#Healthcheck for KinaraProduction-Server
+echo -e "\n\n====KinaraProduction-Server====" >> /scripts/healthcheck/report.txt
+ssh -i /home/ec2-user/keys/CBS.pem ubuntu@52.66.4.37 -p 25499 'sh /home/healthchecks/healthcheck.sh' >> /scripts/healthcheck/report.txt
+
+echo -e "\n\n====SaijaProduction-Server====" >> /scripts/healthcheck/report.txt
+ssh -i /home/ec2-user/keys/CBS.pem ubuntu@13.126.44.79 -p 25499 'sh /home/healthchecks/healthcheck.sh' >> /scripts/healthcheck/report.txt
+
+echo -e "\n\n====IREP-Prod-Server====" >> /scripts/healthcheck/report.txt
+ssh -i /home/ec2-user/keys/CBS.pem ubuntu@13.127.200.214 -p 25499 'sh /home/healthchecks/healthcheck.sh' >> /scripts/healthcheck/report.txt
+
+echo -e "\n\n====Pahal-Production-Server====" >> /scripts/healthcheck/report.txt
+ssh -i /home/ec2-user/keys/CBS.pem ubuntu@13.232.39.54 -p 25499 'sh /home/healthchecks/healthcheck.sh' >> /scripts/healthcheck/report.txt
+
+echo -e "\n\n====SambandhProduction-Server====" >> /scripts/healthcheck/report.txt
+ssh -i /home/ec2-user/keys/CBS.pem ubuntu@52.66.24.201 -p 25499 'sh /home/healthchecks/healthcheck.sh' >> /scripts/healthcheck/report.txt
+
+
+echo "$(cat /scripts/healthcheck/report.txt)" | mail -r jaydeep.saini@e-zest.in -s "Healthcheck report of IFMR Prod Servers for $(date +%d-%B-%Y)" jaydeep.saini@e-zest.in vishal.dorage@e-zest.in hareesha.b@dvara.com
+servers_healthchecks.sh.txt
+Displaying healthcheck.sh.txt.
